@@ -1,0 +1,101 @@
+!pip install git+https://github.com/Hsins/mpl-tc-fonts.git
+
+import mpl_tc_fonts 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from google.colab import files
+uploaded = files.upload()
+
+AV_Box_PD = pd.read_csv('issues.csv', encoding = 'big5')
+
+print(AV_Box_PD.info())
+
+#📊【題組一：資料總覽與清理】
+#資料中有哪些欄位有缺失值？請列出缺失比例最高的前五個欄位。
+
+AV_Box_PD_FallData = (AV_Box_PD.isnull().sum())
+print(AV_Box_PD_FallData.sort_values(ascending=False).head())
+
+#統計每個「狀態」的議題數量（如：Open、Closed、In Progress 等），並用長條圖呈現。
+
+plt.figure(num=1)
+sns.countplot(x='狀態', data=AV_Box_PD)
+plt.xticks(rotation=45)
+plt.title('AV_Box Current Issue Status Count')
+plt.show()
+
+#「預估工時」和「耗用工時」欄位中，有沒有明顯異常值（如極端高或負數）？找出這些異常資料。
+
+#📈【題組二：進度與效能分析】
+#計算每個被分派者（被分派者）處理過的議題總數、平均完成百分比與平均耗用工時，找出前五名的「最有效率」人員（可自行定義效率）。
+
+#將「建立日期」與「結束日期」轉換成時間差（議題處理天數），分析整體處理速度的分布情形。
+AV_Box_PD['建立日期']=pd.to_datetime(AV_Box_PD['建立日期'], format='%Y-%m-%d %H:%M')
+AV_Box_PD['結束日期']=pd.to_datetime(AV_Box_PD['結束日期'], format='%Y-%m-%d %H:%M')
+AV_Box_PD['處理天數']=(AV_Box_PD['結束日期']-AV_Box_PD['建立日期']).dt.days
+
+plt.figure(num=2)
+sns.violinplot(x=AV_Box_PD['處理天數'])
+plt.xlabel('處理天數（天）')
+plt.ylabel('Density')
+plt.title('議題處理天數小提琴圖')
+plt.show()
+
+#請比較不同「分類」下的議題，平均耗用工時的差異，用適合的圖形視覺化。
+
+#📌【題組三：問題追蹤與影響分析】
+#統計「PRM Severity」的每個等級中，各自有多少議題？並與「Severity」欄位的統計結果做比較（兩者是否一致？）。
+
+plt.figure(num=3)
+sns.countplot(x=AV_Box_PD['PRM Severity'], data=AV_Box_PD)
+plt.title('Distribution of Issues by PRM Severity')
+plt.figure(num=4)
+sns.countplot(x=AV_Box_PD['Severity'], data=AV_Box_PD)
+plt.title('Issue Count by Severity Level')
+
+#是否有哪幾個「Issue Detected Version」常常產生高嚴重等級（Severity = High 或 Critical）的議題？
+
+print(AV_Box_PD['Issue Detected Version'].unique())
+version_mapp = {
+    'AVBox Version: V0.4.2 Remote Version V0.4.2': 'v0.4.2',
+    'AVBox Version: V0.4.1 Remote Version V0.4.1': 'v0.4.1',
+    'AVBox Version: V0.4.0 Remote Version V0.4.0': 'v0.4.0',
+    'v0.3.5': 'v0.3.5',
+    'AVBox Version: V0.3.5 Remote Version V0.3.5': 'v0.3.5',
+    'v0.3.2': 'v0.3.2',
+    'AVBox Version: V0.3.2 Remote Version V0.3.2': 'v0.3.2',
+    'AVBox Version: V0.3.1 Remote Version V0.3.1': 'v0.3.1',
+    'AVBox Version: V0.3.0 Remote Version V0.3.0': 'v0.3.0',
+    'v0.3.0': 'v0.3.0',
+    'AVBox Version: V0.3.0 &  Remote Version V0.3.0': 'v0.3.0',
+    'AVBox Version: Bootloader V0.2.0 & APROM V0.2.0 Remote Version V0.2.0': 'v0.2.0',
+    'v0.2.0': 'v0.2.0',
+    'Remote Version V0.2.0': 'v0.2.0',
+    'AVBox v0.2.0;Remote v0.2.0': 'v0.2.0',
+    'v0.1.4': 'v0.1.4',
+    '0.1.4': 'v0.1.4',
+    'AVBox Version: Bootloader V0.2.0 & APROM V0.2.0;Remote Version V0.2.0': 'v0.2.0',
+    'APP: XD001-M-P-APP_AVBOX-V0.1.1; REMOTE: XD001_REMOTE_V0.1.1': 'v0.1.1',
+    'APP: XD001-M-P-APP_AVBOX-V0.1.00_01D4569C; REMOTE: XD001_REMOTE_V0.1.0': 'v0.1.0',
+    'APP: XD001-M-P-APP_AVBOX-V0.1.00_01D4569C ;REMOTE: XD001_REMOTE_V0.1.0': 'v0.1.0',
+    'APP: XD001-M-P-APP_AVBOX-V0.1.00_01D4569C;REMOTE: XD001_REMOTE_V0.1.0': 'v0.1.0',
+    'XD001-M-P-APP_AVBOX-V0.1.00_01D4569C, XD001_REMOTE_V0.1.0': 'v0.1.0'}
+AV_Box_PD['Issue Detected Clean Version'] = AV_Box_PD['Issue Detected Version'].str.strip().str.replace('，', ',', regex=False) .replace(version_mapp)
+print(AV_Box_PD['Issue Detected Clean Version'].unique())
+
+severity_count = pd.crosstab(AV_Box_PD['Issue Detected Clean Version'], AV_Box_PD['Severity'])
+print(severity_count)
+
+plt.figure(num=5)
+severity_count.plot(kind='bar', stacked=True, figsize=(12,6), colormap='Set2')
+plt.title('Severity Distribution by Issue Detected Version')
+plt.xlabel('Issue Detected Version')
+plt.ylabel('Number of Issues')
+plt.xticks(rotation=45, ha='right')
+plt.legend(title='Severity')
+plt.tight_layout()
+plt.show()
+
+#請分析不同「Project impact - Schedule」等級對「完成百分比」與「處理天數」的影響。
