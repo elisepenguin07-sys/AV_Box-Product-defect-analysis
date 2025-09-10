@@ -18,7 +18,7 @@ if df is not None:
   summary['Total'] = summary.sum(axis=1)
   summary = summary.reset_index() 
   desired_order = ['New', 'To be fixed', 'To be verified', 'Resolved', 'Feedback', 'Unfinished Closed', 'Closed', 'Total']
-  summary = summary[desired_order]
+  summary = summary.reindex(columns=desired_order, fill_value=0)
 
   summary.index.name = None
 
