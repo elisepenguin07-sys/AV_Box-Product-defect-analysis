@@ -16,6 +16,7 @@ if uploaded_file is not None:
 if df is not None:
   summary = df.groupby(['Bug\'s category', '狀態']).size().unstack(fill_value=0)
   summary['Total'] = summary.sum(axis=1)
+  summary = summary.reset_index() 
   
   summary.index.name = None
 
