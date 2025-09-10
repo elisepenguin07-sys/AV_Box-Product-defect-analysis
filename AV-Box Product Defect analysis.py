@@ -18,8 +18,9 @@ if df is not None:
   summary['Total'] = summary.sum(axis=1)
   summary = summary.reset_index() 
   desired_order = ['New', 'To be fixed', 'To be verified', 'Resolved', 'Feedback', 'Unfinished Closed', 'Closed', 'Total']
-  summary = summary.reindex(columns=desired_order, fill_value=0)
-  summary = summary.reset_index()
+  columns_order = ["Bug's category"] + [col for col in desired_order if col in summary.columns]
+  summary = summary[columns_order]
+  
 
   summary.index.name = None
 
