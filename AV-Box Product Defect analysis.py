@@ -22,7 +22,6 @@ if df is not None:
   output = BytesIO()
   with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
       summary.to_excel(writer, sheet_name='Summary')
-      writer.save()
   excel_data = output.getvalue()
   
   st.download_button(
