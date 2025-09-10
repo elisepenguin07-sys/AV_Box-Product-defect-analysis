@@ -14,7 +14,7 @@ if uploaded_file is not None:
     st.error(f"Error reading the file. Please make sure the file is encoded in utf-8.：{e}")
 
 if df is not None:
-  summary = df.groupby(['Bug_Category', '狀態']).size().unstack(fill_value=0)
+  summary = df.groupby(['Bug's category', '狀態']).size().unstack(fill_value=0)
   summary['Total'] = summary.sum(axis=1)
   
   summary.index.name = None
