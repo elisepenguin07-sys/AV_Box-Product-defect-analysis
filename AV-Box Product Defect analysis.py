@@ -10,6 +10,8 @@ uploaded_file = st.file_uploader("Please upload the CSV file to analyze.", type=
 if uploaded_file is not None:
   try:
     df = pd.read_csv(uploaded_file, encoding = 'utf-8')
+    df.columns = df.columns.str.strip()
+     st.write("Uploaded CSV columns:", df.columns)
   except Exception as e:
     st.error(f"Error reading the file. Please make sure the file is encoded in utf-8.：{e}")
 
