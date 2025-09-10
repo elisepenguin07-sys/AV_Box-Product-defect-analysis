@@ -17,7 +17,9 @@ if df is not None:
   summary = df.groupby(['Bug\'s category', '狀態']).size().unstack(fill_value=0)
   summary['Total'] = summary.sum(axis=1)
   summary = summary.reset_index() 
-  
+  desired_order = ['New', 'To be fixed', 'To be verified', 'Resolved', 'Feedback', 'Unfinished Closed', 'Closed', 'Total']
+  summary = summary[desired_order]
+
   summary.index.name = None
 
   output = BytesIO()
